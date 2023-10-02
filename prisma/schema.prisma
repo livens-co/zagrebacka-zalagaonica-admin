@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Store {
+  id         String      @id @default(uuid())
+  name       String      @unique
+  userId     String
+  billboards Billboard[] @relation("StoreToBillboard")
+  categories Category[]  @relation("StoreToCategory")
+  products   Product[]   @relation("StoreToProduct")
+  brands     Brand[]     @relation("StoreToBrand")
+  blogs      Blog[]      @relation("StoreToBlog")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Billboard {
+  id         String     @id @default(uuid())
+  storeId    String
+  store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
+  label      String
+  imageUrl   String
+  categories Category[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([storeId])
+}
+
+model Category {
+  id           String    @id @default(uuid())
+  storeId      String
+  store        Store     @relation("StoreToCategory", fields: [storeId], references: [id])
+  billboardId  String
+  billboard    Billboard @relation(fields: [billboardId], references: [id])
+  products     Product[] @relation("CategoryToProduct")
+  name         String
+  categorySlug String    @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([storeId])
+  @@index([billboardId])
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  storeId      String
+  store        Store    @relation("StoreToProduct", fields: [storeId], references: [id])
+  categorySlug String
+  category     Category @relation("CategoryToProduct", fields: [categorySlug], references: [categorySlug])
+  name         String
+  price        Decimal
+  productSlug  String   @unique
+  description  String
+  paymentMethod String
+  isFeatured   Boolean  @default(false)
+  isArchived   Boolean  @default(false)
+  brandSlug    String
+  brand        Brand   @relation(fields: [brandSlug], references: [brandSlug])
+  images       Image[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([categorySlug])
+  @@index([brandSlug])
+}
+
+model Brand {
+  id        String    @id @default(uuid())
+  storeId   String
+  store     Store     @relation("StoreToBrand", fields: [storeId], references: [id])
+  name      String
+  brandSlug String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([storeId])
+}
+
+model Image {
+  id          String   @id @default(uuid())
+  productSlug String
+  product     Product  @relation(fields: [productSlug], references: [productSlug], onDelete: Cascade)
+  url         String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productSlug])
+}
+
+model Blog {
+  id        String   @id @default(uuid())
+  storeId   String
+  store     Store    @relation("StoreToBlog", fields: [storeId], references: [id])
+  blogSlug  String   @unique
+  imageUrl  String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+}
