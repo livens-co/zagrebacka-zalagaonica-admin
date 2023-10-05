@@ -11,7 +11,8 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, brandSlug } = body;
+    const { name, brandSlug, isActive, isFeatured, imageUrl, categorySlug } =
+      body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -21,8 +22,16 @@ export async function POST(
       return new NextResponse('Name is required', { status: 400 });
     }
 
+    if (!imageUrl) {
+      return new NextResponse('Image is required.', { status: 400 });
+    }
+
     if (!brandSlug) {
       return new NextResponse('Brand URL is required', { status: 400 });
+    }
+
+    if (!categorySlug) {
+      return new NextResponse('Category is required', { status: 400 });
     }
 
     if (!params.storeId) {
@@ -44,6 +53,10 @@ export async function POST(
       data: {
         name,
         brandSlug,
+        categorySlug,
+        imageUrl,
+        isActive,
+        isFeatured,
         storeId: params.storeId,
       },
     });
@@ -56,10 +69,14 @@ export async function POST(
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { storeId: string } }
 ) {
   try {
+    const { searchParams } = new URL(req.url);
+    const categorySlug = searchParams.get('categorySlug') || undefined;
+    const isFeatured = searchParams.get('isFeatured');
+
     if (!params.storeId) {
       return new NextResponse('Store ID is required', { status: 400 });
     }
@@ -67,6 +84,12 @@ export async function GET(
     const brands = await prismadb.brand.findMany({
       where: {
         storeId: params.storeId,
+        categorySlug,
+        isFeatured: isFeatured ? true : undefined,
+        isActive: true,
+      },
+      include: {
+        category: true,
       },
     });
 

@@ -3,13 +3,12 @@ import { auth } from '@clerk/nextjs';
 
 import prismadb from '@/lib/prismadb';
 
-// Define a custom type for Prisma errors
-type PrismaError = {
-  code: string;
-  meta?: {
-    target: string[];
-  };
-};
+// type PrismaError = {
+//   code: string;
+//   meta?: {
+//     target: string[];
+//   };
+// };
 
 export async function POST(
   req: Request,
@@ -19,7 +18,7 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, billboardId, categorySlug } = body;
+    const { name, categorySlug, description, imageUrl, isActive } = body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -29,8 +28,12 @@ export async function POST(
       return new NextResponse('Name is required', { status: 400 });
     }
 
-    if (!billboardId) {
-      return new NextResponse('Billboard ID is required', { status: 400 });
+    if (!imageUrl) {
+      return new NextResponse('Image URL is required', { status: 400 });
+    }
+
+    if (!description) {
+      return new NextResponse('category description is required', { status: 400 });
     }
 
     if (!categorySlug) {
@@ -53,26 +56,28 @@ export async function POST(
     }
 
     // TRY CATCH to check if category slug is unique (add message name must be unique)
-    try {
+    // try {
       const category = await prismadb.category.create({
         data: {
           name,
-          billboardId,
+          description,
+          imageUrl,
+          isActive,
+          categorySlug,
           storeId: params.storeId,
-          categorySlug
         },
       });
 
       return NextResponse.json(category);
-    } catch (error) {
-      const prismaError = error as PrismaError;
-      if (prismaError.code === 'P2002' && prismaError.meta?.target.includes('categorySlug')) {
-        // Handle the error when the name is not unique
-        return new NextResponse('Category URL must be unique', { status: 400 });
-      }
+    // } catch (error) {
+    //   const prismaError = error as PrismaError;
+    //   if (prismaError.code === 'P2002' && prismaError.meta?.target.includes('categorySlug')) {
+    //     // Handle the error when the name is not unique
+    //     return new NextResponse('Category URL must be unique', { status: 400 });
+    //   }
       
-      throw error;
-    }
+    //   throw error;
+    // }
   } catch (error) {
     console.log('[CATEGORIES_POST]', error);
     return new NextResponse('Internal error', { status: 500 });

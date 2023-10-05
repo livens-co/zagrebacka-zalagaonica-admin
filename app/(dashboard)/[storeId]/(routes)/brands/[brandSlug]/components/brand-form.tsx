@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import * as z from 'zod';
-import { Brand } from '@prisma/client';
+import { Brand, Category } from '@prisma/client';
 import { Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,20 +24,29 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { AlertModal } from '@/components/modals/alert-modal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import ImageUpload from '@/components/ui/image-upload';
 
 const formSchema = z.object({
   name: z.string().min(1),
   brandSlug: z.string().min(1),
+  imageUrl: z.string(),
+  categorySlug: z.string().min(1),
+  isFeatured: z.boolean().default(false).optional(),
+  isActive: z.boolean().default(true).optional(),
 });
 
 type BrandFormValues = z.infer<typeof formSchema>;
 
 interface BrandFormProps {
   initialData: Brand | null;
+  categories: Category[];
 }
 
 export const BrandForm: React.FC<BrandFormProps> = ({
   initialData,
+  categories
 }) => {
   const params = useParams();
   const router = useRouter();
@@ -56,6 +66,10 @@ export const BrandForm: React.FC<BrandFormProps> = ({
     defaultValues: initialData || {
       name: '',
       brandSlug: '',
+      imageUrl: '',
+      isFeatured: false,
+      isActive: true,
+      categorySlug: '',
     },
   });
 
@@ -161,7 +175,101 @@ export const BrandForm: React.FC<BrandFormProps> = ({
                 </FormItem>
               )}
             />
-          </div>
+          
+          <FormField
+              control={form.control}
+              name="categorySlug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a category"
+                        /> 
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem
+                          key={category.categorySlug}
+                          value={category.categorySlug}
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+                 <FormField
+              control={form.control}
+              name="isFeatured"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Featured</FormLabel>
+                    <FormDescription>
+                      This brand will in dropdown menu.
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Active</FormLabel>
+                    <FormDescription>
+                      This brand will not appear anywhere in the store.
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Brand image</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value ? [field.value] : []}
+                    disabled={loading}
+                    onChange={(url) => field.onChange(url)}
+                    onRemove={() => field.onChange('')}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+            </div>
           <Button disabled={loading} className="ml-auto" type="submit">
             {action}
           </Button>

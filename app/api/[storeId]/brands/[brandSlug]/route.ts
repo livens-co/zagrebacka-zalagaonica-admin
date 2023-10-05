@@ -16,6 +16,9 @@ export async function GET(
       where: {
         brandSlug: params.brandSlug,
       },
+      include: {
+        category: true
+      }
     });
 
     return NextResponse.json(brand);
@@ -33,7 +36,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, brandSlug } = body;
+    const { name, brandSlug, imageUrl, isActive, isFeatured, categorySlug } = body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -45,6 +48,14 @@ export async function PATCH(
 
     if (!brandSlug) {
       return new NextResponse('Brand URL is required', { status: 400 });
+    }
+
+    if (!imageUrl) {
+      return new NextResponse('Image is required', { status: 400 });
+    }
+
+    if (!categorySlug) {
+      return new NextResponse('Category is required', { status: 400 });
     }
 
     if (!params.brandSlug) {
@@ -69,6 +80,10 @@ export async function PATCH(
       data: {
         name,
         brandSlug,
+        imageUrl,
+        isActive,
+        isFeatured,
+        categorySlug,
       },
     });
 

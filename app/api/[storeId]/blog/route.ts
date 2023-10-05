@@ -19,7 +19,7 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { title, blogSlug, imageUrl, content } = body;
+    const { title, blogSlug, imageUrl, content, date, description } = body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -31,6 +31,14 @@ export async function POST(
 
     if (!content) {
       return new NextResponse('Article text is required', { status: 400 });
+    }
+
+    if (!date) {
+      return new NextResponse('Date is required', { status: 400 });
+    }
+
+    if (!description) {
+      return new NextResponse('Short description is required', { status: 400 });
     }
 
     if (!imageUrl) {
@@ -57,27 +65,29 @@ export async function POST(
     }
 
     // TRY CATCH to check if category slug is unique (add message name must be unique)
-    try {
+    // try {
       const blog = await prismadb.blog.create({
         data: {
           title,
           content,
           blogSlug,
           imageUrl,
+          description,
+          date,
           storeId: params.storeId,
         },
       });
 
       return NextResponse.json(blog);
-    } catch (error) {
-      const prismaError = error as PrismaError;
-      if (prismaError.code === 'P2002' && prismaError.meta?.target.includes('blogSlug')) {
-        // Handle the error when the name is not unique
-        return new NextResponse('Blog URL must be unique', { status: 400 });
-      }
+    // } catch (error) {
+    //   const prismaError = error as PrismaError;
+    //   if (prismaError.code === 'P2002' && prismaError.meta?.target.includes('blogSlug')) {
+    //     // Handle the error when the name is not unique
+    //     return new NextResponse('Blog URL must be unique', { status: 400 });
+    //   }
       
-      throw error;
-    }
+    //   throw error;
+    // }
   } catch (error) {
     console.log('[BLOG_POST]', error);
     return new NextResponse('Internal error', { status: 500 });

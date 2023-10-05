@@ -25,14 +25,13 @@ model Store {
 }
 
 model Billboard {
-  id         String     @id @default(uuid())
-  storeId    String
-  store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id])
-  label      String
-  imageUrl   String
-  categories Category[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id        String   @id @default(uuid())
+  storeId   String
+  store     Store    @relation("StoreToBillboard", fields: [storeId], references: [id])
+  label     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([storeId])
 }
@@ -41,36 +40,37 @@ model Category {
   id           String    @id @default(uuid())
   storeId      String
   store        Store     @relation("StoreToCategory", fields: [storeId], references: [id])
-  billboardId  String
-  billboard    Billboard @relation(fields: [billboardId], references: [id])
+  brands       Brand[]   @relation("CategoryToBrand")
   products     Product[] @relation("CategoryToProduct")
   name         String
+  description  String    @db.Text
+  imageUrl     String
+  isActive     Boolean   @default(true)
   categorySlug String    @unique
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   @@index([storeId])
-  @@index([billboardId])
 }
 
 model Product {
-  id           String   @id @default(uuid())
-  storeId      String
-  store        Store    @relation("StoreToProduct", fields: [storeId], references: [id])
-  categorySlug String
-  category     Category @relation("CategoryToProduct", fields: [categorySlug], references: [categorySlug])
-  name         String
-  price        Decimal
-  productSlug  String   @unique
-  description  String
+  id            String   @id @default(uuid())
+  storeId       String
+  store         Store    @relation("StoreToProduct", fields: [storeId], references: [id])
+  categorySlug  String
+  category      Category @relation("CategoryToProduct", fields: [categorySlug], references: [categorySlug])
+  name          String
+  price         Decimal
+  productSlug   String   @unique
+  description   String   @db.LongText
   paymentMethod String
-  isFeatured   Boolean  @default(false)
-  isArchived   Boolean  @default(false)
-  brandSlug    String
-  brand        Brand   @relation(fields: [brandSlug], references: [brandSlug])
-  images       Image[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isFeatured    Boolean  @default(false)
+  isArchived    Boolean  @default(false)
+  brandSlug     String
+  brand         Brand    @relation(fields: [brandSlug], references: [brandSlug])
+  images        Image[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([storeId])
   @@index([categorySlug])
@@ -78,16 +78,22 @@ model Product {
 }
 
 model Brand {
-  id        String    @id @default(uuid())
-  storeId   String
-  store     Store     @relation("StoreToBrand", fields: [storeId], references: [id])
-  name      String
-  brandSlug String    @unique
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           String    @id @default(uuid())
+  storeId      String
+  store        Store     @relation("StoreToBrand", fields: [storeId], references: [id])
+  name         String
+  imageUrl     String
+  brandSlug    String    @unique
+  products     Product[]
+  isFeatured   Boolean   @default(false)
+  isActive     Boolean   @default(true)
+  categorySlug String
+  category     Category  @relation("CategoryToBrand", fields: [categorySlug], references: [categorySlug])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([storeId])
+  @@index([categorySlug])
 }
 
 model Image {
@@ -102,15 +108,17 @@ model Image {
 }
 
 model Blog {
-  id        String   @id @default(uuid())
-  storeId   String
-  store     Store    @relation("StoreToBlog", fields: [storeId], references: [id])
-  blogSlug  String   @unique
-  imageUrl  String
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  storeId     String
+  store       Store    @relation("StoreToBlog", fields: [storeId], references: [id])
+  blogSlug    String   @unique
+  imageUrl    String
+  title       String
+  date        String
+  content     String   @db.LongText
+  description String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([storeId])
 }

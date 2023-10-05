@@ -42,7 +42,7 @@ export async function POST(
 
     if (!categorySlug) {
       return new NextResponse('Category is required', { status: 400 });
-    }
+    } 
 
     if (!productSlug) {
       return new NextResponse('Product URL is required', { status: 400 });

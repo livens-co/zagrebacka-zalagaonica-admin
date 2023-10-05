@@ -33,7 +33,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const { title, blogSlug, imageUrl, content } = body;
+    const { title, blogSlug, imageUrl, content, description, date } = body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -45,6 +45,14 @@ export async function PATCH(
 
     if (!content) {
       return new NextResponse('Article text is required', { status: 400 });
+    }
+
+    if (!date) {
+      return new NextResponse('Date is required', { status: 400 });
+    }
+
+    if (!description) {
+      return new NextResponse('Short description is required', { status: 400 });
     }
 
     if (!imageUrl) {
@@ -75,6 +83,8 @@ export async function PATCH(
         content,
         blogSlug,
         imageUrl,
+        description, 
+        date
       },
     });
 

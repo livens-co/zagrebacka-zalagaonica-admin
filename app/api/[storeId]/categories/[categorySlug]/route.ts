@@ -17,7 +17,7 @@ export async function GET(
         categorySlug: params.categorySlug,
       },
       include: {
-        billboard: true,
+        // billboard: true,
       },
     });
 
@@ -36,7 +36,7 @@ export async function PATCH(
     const { userId } = auth();
     const body = await req.json();
 
-    const { name, billboardId, categorySlug } = body;
+    const { name, description, imageUrl, categorySlug, isActive } = body;
 
     if (!userId) {
       return new NextResponse('Unauthenticated', { status: 401 });
@@ -46,15 +46,18 @@ export async function PATCH(
       return new NextResponse('Name is required', { status: 400 });
     }
 
-    if (!billboardId) {
-      return new NextResponse('Billboard ID is required', { status: 400 });
+    if (!imageUrl) {
+      return new NextResponse('Image is required', { status: 400 });
     }
 
     if (!categorySlug) {
       return new NextResponse('Category URL is required', { status: 400 });
     }
 
-    // categoryName
+    if (!description) {
+      return new NextResponse('Description is required', { status: 400 });
+    }
+
     if (!params.categorySlug) {
       return new NextResponse('Category URL is required', { status: 400 });
     }
@@ -72,13 +75,14 @@ export async function PATCH(
 
     const category = await prismadb.category.updateMany({
       where: {
-        // categoryName
         categorySlug: params.categorySlug,
       },
       data: {
         name,
-        billboardId,
         categorySlug,
+        imageUrl,
+        description,
+        isActive
       },
     });
 

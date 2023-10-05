@@ -25,7 +25,6 @@ import { Input } from '@/components/ui/input';
 import { AlertModal } from '@/components/modals/alert-modal';
 
 import ImageUpload from '@/components/ui/image-upload';
-import Markdown from 'react-markdown';
 import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
@@ -33,6 +32,8 @@ const formSchema = z.object({
   blogSlug: z.string().min(1),
   imageUrl: z.string().min(1),
   content: z.string().min(1),
+  description: z.string().min(1),
+  date: z.string().min(1),
 });
 
 type ArticleFormValues = z.infer<typeof formSchema>;
@@ -62,6 +63,8 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({ initialData }) => {
       blogSlug: '',
       imageUrl: '',
       content: '',
+      description: '',
+      date: ''
     },
   });
  
@@ -167,6 +170,40 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({ initialData }) => {
             />
             <FormField
               control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Date"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Short article description"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="imageUrl"
               render={({ field }) => (
                 <FormItem>
@@ -208,12 +245,7 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({ initialData }) => {
           </Button>
         </form>
       </Form>
-      {/* <div className="mt-4">
-        <h2 className="text-xl font-semibold">Article Preview:</h2>
-        <div className="border p-2">
-          <Markdown>{form.getValues('content')}</Markdown>
-        </div>
-      </div> */}
+ 
     </>
   );
 };
