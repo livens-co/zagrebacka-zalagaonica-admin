@@ -299,7 +299,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 <FormItem>
                   <FormLabel>Payment Methods</FormLabel>
                   <FormControl>
-                    <Input
+                    {/* <Input
+                      disabled={loading}
+                      placeholder=""
+                      {...field}
+                    /> */}
+                    <Textarea
                       disabled={loading}
                       placeholder="Payment methods"
                       {...field}
