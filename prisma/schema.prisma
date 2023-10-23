@@ -98,6 +98,7 @@ model Brand {
 
 model Image {
   id          String   @id @default(uuid())
+  priority    Int      @default(autoincrement()) @unique
   productSlug String
   product     Product  @relation(fields: [productSlug], references: [productSlug], onDelete: Cascade)
   url         String
